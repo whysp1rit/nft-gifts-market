@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Создать сделку - NFT Gifts Exchange{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-plus me-2"></i>Создать новую сделку</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="nft_link" class="form-label">Ссылка на NFT подарок</label>
+                                <input type="url" class="form-control" id="nft_link" name="nft_link" 
+                                       placeholder="https://t.me/gift/..." required>
+                                <div class="form-text">Прямая ссылка на NFT подарок в Telegram</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="nft_username" class="form-label">Username получателя (опционально)</label>
+                                <input type="text" class="form-control" id="nft_username" name="nft_username" 
+                                       placeholder="@username">
+                                <div class="form-text">Если NFT должен быть отправлен конкретному пользователю</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="amount" class="form-label">Сумма сделки</label>
+                                <input type="number" class="form-control" id="amount" name="amount" 
+                                       step="0.01" min="0.01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="currency" class="form-label">Валюта</label>
+                                <select class="form-select" id="currency" name="currency" required>
+                                    <option value="">Выберите валюту</option>
+                                    <option value="stars">⭐ Звезды Telegram</option>
+                                    <option value="rub">₽ Российские рубли</option>
+                                    <option value="uah">₴ Украинские гривны</option>
+                                    <option value="usd">$ Доллары США</option>
+                                    <option value="eur">€ Евро</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Описание сделки</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" 
+                                  placeholder="Опишите детали NFT подарка, условия сделки..."></textarea>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-exclamation-triangle me-2"></i>Важная информация:</h6>
+                        <ul class="mb-0">
+                            <li>После создания сделки вы получите уникальную ссылку для покупателя</li>
+                            <li>Средства поступят на ваш баланс после оплаты покупателем</li>
+                            <li>Для вывода средств необходимо пройти верификацию аккаунта</li>
+                            <li>Переводите NFT подарок только после подтверждения оплаты</li>
+                        </ul>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary me-md-2">Отмена</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check me-2"></i>Создать сделку
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Советы для успешных сделок</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Для продавцов:</h6>
+                        <ul>
+                            <li>Указывайте точную ссылку на NFT подарок</li>
+                            <li>Добавляйте подробное описание</li>
+                            <li>Отвечайте быстро на вопросы покупателей</li>
+                            <li>Переводите NFT сразу после оплаты</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Безопасность:</h6>
+                        <ul>
+                            <li>Проверяйте подлинность NFT подарков</li>
+                            <li>Используйте только нашу платформу для оплаты</li>
+                            <li>Сообщайте о подозрительной активности</li>
+                            <li>Сохраняйте скриншоты переписки</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

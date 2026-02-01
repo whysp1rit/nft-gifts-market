@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Сделка создана - NFT Gifts Exchange{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white text-center">
+                <h4 class="mb-0"><i class="fas fa-check-circle me-2"></i>Сделка успешно создана!</h4>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-4">
+                    <i class="fas fa-gift fa-5x text-success"></i>
+                </div>
+                
+                <h5 class="mb-3">Сделка #{{ deal_id }}</h5>
+                <p class="text-muted mb-4">
+                    Ваша сделка создана и готова к использованию. Отправьте ссылку ниже покупателю для оплаты.
+                </p>
+
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-info-circle me-2"></i>Ссылка для покупателя:</h6>
+                    <div class="input-group mt-2">
+                        <input type="text" class="form-control" id="dealUrl" value="{{ deal_url }}" readonly>
+                        <button class="btn btn-outline-primary" type="button" onclick="copyDealUrl()">
+                            <i class="fas fa-copy me-1"></i>Копировать
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6><i class="fas fa-clock me-2"></i>Что дальше?</h6>
+                                <ol class="text-start small">
+                                    <li>Отправьте ссылку покупателю</li>
+                                    <li>Дождитесь оплаты сделки</li>
+                                    <li>Переведите NFT подарок</li>
+                                    <li>Подтвердите выполнение</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6><i class="fas fa-shield-alt me-2"></i>Безопасность</h6>
+                                <ul class="text-start small">
+                                    <li>Средства защищены эскроу</li>
+                                    <li>Переводите NFT только после оплаты</li>
+                                    <li>Поддержка доступна 24/7</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                    <a href="{{ deal_url }}" class="btn btn-primary me-md-2">
+                        <i class="fas fa-eye me-2"></i>Посмотреть сделку
+                    </a>
+                    <a href="{{ url_for('create_deal') }}" class="btn btn-outline-primary me-md-2">
+                        <i class="fas fa-plus me-2"></i>Создать еще одну
+                    </a>
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-home me-2"></i>На главную
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-share-alt me-2"></i>Способы отправки ссылки</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <button class="btn btn-outline-primary mb-2" onclick="shareToTelegram()">
+                            <i class="fab fa-telegram fa-2x"></i>
+                            <br><small>Telegram</small>
+                        </button>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <button class="btn btn-outline-success mb-2" onclick="shareToWhatsApp()">
+                            <i class="fab fa-whatsapp fa-2x"></i>
+                            <br><small>WhatsApp</small>
+                        </button>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <button class="btn btn-outline-info mb-2" onclick="shareByEmail()">
+                            <i class="fas fa-envelope fa-2x"></i>
+                            <br><small>Email</small>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyDealUrl() {
+    const urlInput = document.getElementById('dealUrl');
+    urlInput.select();
+    document.execCommand('copy');
+    
+    const button = event.target.closest('button');
+    const originalHTML = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-check me-1"></i>Скопировано!';
+    button.classList.add('btn-success');
+    button.classList.remove('btn-outline-primary');
+    
+    setTimeout(() => {
+        button.innerHTML = originalHTML;
+        button.classList.remove('btn-success');
+        button.classList.add('btn-outline-primary');
+    }, 2000);
+}
+
+function shareToTelegram() {
+    const url = document.getElementById('dealUrl').value;
+    const text = `Привет! Я создал сделку для продажи NFT подарка. Можешь оплатить по этой ссылке: ${url}`;
+    window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, '_blank');
+}
+
+function shareToWhatsApp() {
+    const url = document.getElementById('dealUrl').value;
+    const text = `Привет! Я создал сделку для продажи NFT подарка. Можешь оплатить по этой ссылке: ${url}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+}
+
+function shareByEmail() {
+    const url = document.getElementById('dealUrl').value;
+    const subject = 'Сделка NFT подарка';
+    const body = `Привет!\n\nЯ создал сделку для продажи NFT подарка в Telegram.\nТы можешь безопасно оплатить по этой ссылке: ${url}\n\nСпасибо!`;
+    window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
+}
+</script>
+{% endblock %}

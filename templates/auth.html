@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Авторизация - NFT Gifts Exchange{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white text-center">
+                <h4 class="mb-0"><i class="fab fa-telegram me-2"></i>Вход через Telegram</h4>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-4">
+                    <i class="fab fa-telegram fa-5x text-primary"></i>
+                </div>
+                
+                <h5 class="mb-3">Авторизация аккаунта</h5>
+                <p class="text-muted mb-4">
+                    Для безопасности сделок и возможности вывода средств необходимо пройти верификацию вашего Telegram аккаунта
+                </p>
+
+                <div id="authStep1" class="auth-step">
+                    <div class="mb-3">
+                        <label for="phoneNumber" class="form-label">Номер телефона</label>
+                        <input type="tel" class="form-control" id="phoneNumber" placeholder="+7 (999) 123-45-67">
+                        <div class="form-text">Введите номер телефона, привязанный к Telegram</div>
+                    </div>
+                    
+                    <button class="btn btn-primary btn-lg" onclick="sendCode()">
+                        <i class="fas fa-paper-plane me-2"></i>Отправить код
+                    </button>
+                </div>
+
+                <div id="authStep2" class="auth-step d-none">
+                    <div class="alert alert-info">
+                        <i class="fas fa-sms me-2"></i>
+                        Код подтверждения отправлен в Telegram на номер <strong id="sentPhone"></strong>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Введите код подтверждения</label>
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <input type="text" class="form-control text-center code-input" maxlength="1" style="width: 50px;">
+                            <input type="text" class="form-control text-center code-input" maxlength="1" style="width: 50px;">
+                            <input type="text" class="form-control text-center code-input" maxlength="1" style="width: 50px;">
+                            <input type="text" class="form-control text-center code-input" maxlength="1" style="width: 50px;">
+                            <input type="text" class="form-control text-center code-input" maxlength="1" style="width: 50px;">
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-success btn-lg" onclick="verifyCode()">
+                        <i class="fas fa-check me-2"></i>Подтвердить
+                    </button>
+                    
+                    <div class="mt-3">
+                        <button class="btn btn-link" onclick="resendCode()">
+                            <i class="fas fa-redo me-1"></i>Отправить код повторно
+                        </button>
+                    </div>
+                </div>
+
+                <div id="authStep3" class="auth-step d-none">
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Авторизация успешно завершена!
+                    </div>
+                    
+                    <p class="mb-3">Ваш аккаунт верифицирован. Теперь вы можете:</p>
+                    <ul class="list-unstyled text-start">
+                        <li><i class="fas fa-check text-success me-2"></i>Создавать сделки</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Участвовать в торгах</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Выводить средства</li>
+                    </ul>
+                    
+                    <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-home me-2"></i>На главную
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Безопасность</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12">
+                        <h6>Зачем нужна верификация?</h6>
+                        <ul class="small">
+                            <li>Защита от мошенничества</li>
+                            <li>Возможность вывода средств</li>
+                            <li>Повышение доверия между пользователями</li>
+                            <li>Соблюдение требований безопасности</li>
+                        </ul>
+                        
+                        <div class="alert alert-warning mt-3">
+                            <small>
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                <strong>Важно:</strong> Мы не сохраняем ваши личные данные. 
+                                Верификация используется только для создания безопасной сессии.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentStep = 1;
+let phoneNumber = '';
+
+function sendCode() {
+    phoneNumber = document.getElementById('phoneNumber').value;
+    
+    if (!phoneNumber) {
+        alert('Введите номер телефона');
+        return;
+    }
+    
+    // Здесь будет AJAX запрос для отправки кода
+    fetch('/send_verification_code', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({phone: phoneNumber})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('sentPhone').textContent = phoneNumber;
+            showStep(2);
+        } else {
+            alert('Ошибка отправки кода: ' + data.message);
+        }
+    });
+}
+
+function verifyCode() {
+    const codeInputs = document.querySelectorAll('.code-input');
+    const code = Array.from(codeInputs).map(input => input.value).join('');
+    
+    if (code.length !== 5) {
+        alert('Введите полный код');
+        return;
+    }
+    
+    // Здесь будет AJAX запрос для верификации кода
+    fetch('/verify_code', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({phone: phoneNumber, code: code})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showStep(3);
+        } else {
+            alert('Неверный код: ' + data.message);
+        }
+    });
+}
+
+function resendCode() {
+    sendCode();
+}
+
+function showStep(step) {
+    document.querySelectorAll('.auth-step').forEach(el => el.classList.add('d-none'));
+    document.getElementById('authStep' + step).classList.remove('d-none');
+    currentStep = step;
+}
+
+// Автоматический переход между полями кода
+document.addEventListener('DOMContentLoaded', function() {
+    const codeInputs = document.querySelectorAll('.code-input');
+    
+    codeInputs.forEach((input, index) => {
+        input.addEventListener('input', function() {
+            if (this.value.length === 1 && index < codeInputs.length - 1) {
+                codeInputs[index + 1].focus();
+            }
+        });
+        
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Backspace' && this.value === '' && index > 0) {
+                codeInputs[index - 1].focus();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

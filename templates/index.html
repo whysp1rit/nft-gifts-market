@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Главная - NFT Gifts Exchange{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center py-5 mb-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px;">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3">
+            <i class="fas fa-gift me-3"></i>NFT Gifts Exchange
+        </h1>
+        <p class="lead mb-4">Безопасная платформа для торговли NFT подарками Telegram</p>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <a href="{{ url_for('create_deal') }}" class="btn btn-light btn-lg me-md-2">
+                        <i class="fas fa-plus me-2"></i>Создать сделку
+                    </a>
+                    <button class="btn btn-outline-light btn-lg" data-bs-toggle="modal" data-bs-target="#instructionModal">
+                        <i class="fas fa-question-circle me-2"></i>Как это работает?
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-shield-alt fa-3x text-primary"></i>
+                </div>
+                <h5 class="card-title">Безопасные сделки</h5>
+                <p class="card-text">Система эскроу защищает ваши средства до завершения сделки</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-coins fa-3x text-warning"></i>
+                </div>
+                <h5 class="card-title">Множество валют</h5>
+                <p class="card-text">Поддержка звезд Telegram, рублей, гривен и других валют</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-headset fa-3x text-success"></i>
+                </div>
+                <h5 class="card-title">Поддержка 24/7</h5>
+                <p class="card-text">Наша команда всегда готова помочь решить любые вопросы</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Статистика платформы</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <h3 class="text-primary">1,247</h3>
+                        <p class="text-muted">Успешных сделок</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h3 class="text-success">892</h3>
+                        <p class="text-muted">Активных пользователей</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h3 class="text-warning">₽2,847,392</h3>
+                        <p class="text-muted">Общий оборот</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h3 class="text-info">99.8%</h3>
+                        <p class="text-muted">Безопасность сделок</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if not session.user_id %}
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <h5><i class="fab fa-telegram me-2"></i>Начните торговать прямо сейчас!</h5>
+            <p class="mb-3">Войдите через Telegram, чтобы создавать и участвовать в сделках</p>
+            <a href="{{ url_for('auth') }}" class="btn btn-primary">
+                <i class="fab fa-telegram me-2"></i>Войти через Telegram
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

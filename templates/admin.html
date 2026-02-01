@@ -1,0 +1,512 @@
+{% extends "base.html" %}
+
+{% block title %}Админ панель - NFT Gifts Exchange{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0"><i class="fas fa-cog me-2"></i>Панель администратора</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="nav flex-column nav-pills" id="admin-tabs" role="tablist">
+                            <button class="nav-link active" id="dashboard-tab" data-bs-toggle="pill" 
+                                    data-bs-target="#dashboard" type="button" role="tab">
+                                <i class="fas fa-chart-line me-2"></i>Дашборд
+                            </button>
+                            <button class="nav-link" id="users-tab" data-bs-toggle="pill" 
+                                    data-bs-target="#users" type="button" role="tab">
+                                <i class="fas fa-users me-2"></i>Пользователи
+                            </button>
+                            <button class="nav-link" id="deals-tab" data-bs-toggle="pill" 
+                                    data-bs-target="#deals" type="button" role="tab">
+                                <i class="fas fa-handshake me-2"></i>Сделки
+                            </button>
+                            <button class="nav-link" id="balance-tab" data-bs-toggle="pill" 
+                                    data-bs-target="#balance" type="button" role="tab">
+                                <i class="fas fa-wallet me-2"></i>Управление балансом
+                            </button>
+                            <button class="nav-link" id="settings-tab" data-bs-toggle="pill" 
+                                    data-bs-target="#settings" type="button" role="tab">
+                                <i class="fas fa-cog me-2"></i>Настройки
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-9">
+                        <div class="tab-content" id="admin-tabContent">
+                            <!-- Дашборд -->
+                            <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+                                <h5><i class="fas fa-chart-line me-2"></i>Статистика платформы</h5>
+                                
+                                <div class="row mb-4">
+                                    <div class="col-md-3">
+                                        <div class="card bg-primary text-white">
+                                            <div class="card-body text-center">
+                                                <h3 id="totalUsers">0</h3>
+                                                <p class="mb-0">Пользователей</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card bg-success text-white">
+                                            <div class="card-body text-center">
+                                                <h3 id="totalDeals">0</h3>
+                                                <p class="mb-0">Сделок</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card bg-warning text-white">
+                                            <div class="card-body text-center">
+                                                <h3 id="pendingDeals">0</h3>
+                                                <p class="mb-0">Ожидают</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card bg-info text-white">
+                                            <div class="card-body text-center">
+                                                <h3 id="totalVolume">₽0</h3>
+                                                <p class="mb-0">Оборот</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Последние сделки</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>ID</th>
+                                                        <th>Продавец</th>
+                                                        <th>Покупатель</th>
+                                                        <th>Сумма</th>
+                                                        <th>Статус</th>
+                                                        <th>Дата</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="recentDeals">
+                                                    <!-- Данные загружаются через AJAX -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Пользователи -->
+                            <div class="tab-pane fade" id="users" role="tabpanel">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5><i class="fas fa-users me-2"></i>Управление пользователями</h5>
+                                    <button class="btn btn-primary btn-sm" onclick="refreshUsers()">
+                                        <i class="fas fa-sync me-1"></i>Обновить
+                                    </button>
+                                </div>
+                                
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Telegram ID</th>
+                                                <th>Username</th>
+                                                <th>Баланс</th>
+                                                <th>Сделки</th>
+                                                <th>Верификация</th>
+                                                <th>Действия</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="usersList">
+                                            <!-- Данные загружаются через AJAX -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Сделки -->
+                            <div class="tab-pane fade" id="deals" role="tabpanel">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5><i class="fas fa-handshake me-2"></i>Управление сделками</h5>
+                                    <div>
+                                        <select class="form-select form-select-sm d-inline-block w-auto me-2" id="dealStatusFilter">
+                                            <option value="">Все статусы</option>
+                                            <option value="pending">Ожидают оплаты</option>
+                                            <option value="paid">Оплачено</option>
+                                            <option value="completed">Завершено</option>
+                                            <option value="cancelled">Отменено</option>
+                                        </select>
+                                        <button class="btn btn-primary btn-sm" onclick="refreshDeals()">
+                                            <i class="fas fa-sync me-1"></i>Обновить
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Продавец</th>
+                                                <th>Покупатель</th>
+                                                <th>NFT</th>
+                                                <th>Сумма</th>
+                                                <th>Статус</th>
+                                                <th>Дата</th>
+                                                <th>Действия</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="dealsList">
+                                            <!-- Данные загружаются через AJAX -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Управление балансом -->
+                            <div class="tab-pane fade" id="balance" role="tabpanel">
+                                <h5><i class="fas fa-wallet me-2"></i>Управление балансом пользователей</h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">Пополнение баланса</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <form id="addBalanceForm">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Telegram ID пользователя</label>
+                                                        <input type="text" class="form-control" id="userTelegramId" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Сумма</label>
+                                                        <input type="number" class="form-control" id="addAmount" step="0.01" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Валюта</label>
+                                                        <select class="form-select" id="addCurrency" required>
+                                                            <option value="stars">⭐ Звезды</option>
+                                                            <option value="rub">₽ Рубли</option>
+                                                            <option value="uah">₴ Гривны</option>
+                                                        </select>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-success">
+                                                        <i class="fas fa-plus me-1"></i>Пополнить
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">Управление рейтингом</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <form id="updateRatingForm">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Telegram ID пользователя</label>
+                                                        <input type="text" class="form-control" id="ratingUserId" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Количество успешных сделок</label>
+                                                        <input type="number" class="form-control" id="successfulDeals" min="0" required>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary">
+                                                        <i class="fas fa-star me-1"></i>Обновить рейтинг
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Настройки -->
+                            <div class="tab-pane fade" id="settings" role="tabpanel">
+                                <h5><i class="fas fa-cog me-2"></i>Настройки системы</h5>
+                                
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Общие настройки</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <form id="settingsForm">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Комиссия платформы (%)</label>
+                                                        <input type="number" class="form-control" id="platformFee" 
+                                                               value="2.5" step="0.1" min="0" max="10">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Минимальная сумма сделки</label>
+                                                        <input type="number" class="form-control" id="minDealAmount" 
+                                                               value="10" step="1" min="1">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label class="form-label">Контакт поддержки</label>
+                                                <input type="text" class="form-control" id="supportContact" 
+                                                       value="@admin_username">
+                                            </div>
+                                            
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save me-1"></i>Сохранить настройки
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Загрузка данных при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboard();
+    loadUsers();
+    loadDeals();
+});
+
+function loadDashboard() {
+    fetch('/admin/dashboard')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('totalUsers').textContent = data.totalUsers || 0;
+            document.getElementById('totalDeals').textContent = data.totalDeals || 0;
+            document.getElementById('pendingDeals').textContent = data.pendingDeals || 0;
+            document.getElementById('totalVolume').textContent = '₽' + (data.totalVolume || 0);
+            
+            // Загрузка последних сделок
+            const recentDealsTable = document.getElementById('recentDeals');
+            recentDealsTable.innerHTML = '';
+            
+            if (data.recentDeals) {
+                data.recentDeals.forEach(deal => {
+                    const row = `
+                        <tr>
+                            <td>${deal.id}</td>
+                            <td>${deal.seller_id}</td>
+                            <td>${deal.buyer_id || '-'}</td>
+                            <td>${deal.amount} ${deal.currency}</td>
+                            <td><span class="badge bg-${getStatusColor(deal.status)}">${getStatusText(deal.status)}</span></td>
+                            <td>${new Date(deal.created_at).toLocaleDateString()}</td>
+                        </tr>
+                    `;
+                    recentDealsTable.innerHTML += row;
+                });
+            }
+        });
+}
+
+function loadUsers() {
+    fetch('/admin/users')
+        .then(response => response.json())
+        .then(data => {
+            const usersTable = document.getElementById('usersList');
+            usersTable.innerHTML = '';
+            
+            if (data.users) {
+                data.users.forEach(user => {
+                    const row = `
+                        <tr>
+                            <td>${user.telegram_id}</td>
+                            <td>${user.username || '-'}</td>
+                            <td>
+                                ⭐${user.balance_stars} | ₽${user.balance_rub} | ₴${user.balance_uah}
+                            </td>
+                            <td>${user.successful_deals}</td>
+                            <td>
+                                <span class="badge bg-${user.is_verified ? 'success' : 'warning'}">
+                                    ${user.is_verified ? 'Верифицирован' : 'Не верифицирован'}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="editUser('${user.telegram_id}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    usersTable.innerHTML += row;
+                });
+            }
+        });
+}
+
+function loadDeals() {
+    const status = document.getElementById('dealStatusFilter')?.value || '';
+    
+    fetch(`/admin/deals?status=${status}`)
+        .then(response => response.json())
+        .then(data => {
+            const dealsTable = document.getElementById('dealsList');
+            dealsTable.innerHTML = '';
+            
+            if (data.deals) {
+                data.deals.forEach(deal => {
+                    const row = `
+                        <tr>
+                            <td>${deal.id}</td>
+                            <td>${deal.seller_id}</td>
+                            <td>${deal.buyer_id || '-'}</td>
+                            <td>
+                                ${deal.nft_link ? '<a href="' + deal.nft_link + '" target="_blank">Ссылка</a>' : deal.nft_username}
+                            </td>
+                            <td>${deal.amount} ${deal.currency}</td>
+                            <td><span class="badge bg-${getStatusColor(deal.status)}">${getStatusText(deal.status)}</span></td>
+                            <td>${new Date(deal.created_at).toLocaleDateString()}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-success" onclick="completeDeal('${deal.id}')">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="cancelDeal('${deal.id}')">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    dealsTable.innerHTML += row;
+                });
+            }
+        });
+}
+
+function getStatusColor(status) {
+    switch(status) {
+        case 'pending': return 'warning';
+        case 'paid': return 'info';
+        case 'completed': return 'success';
+        case 'cancelled': return 'danger';
+        default: return 'secondary';
+    }
+}
+
+function getStatusText(status) {
+    switch(status) {
+        case 'pending': return 'Ожидает';
+        case 'paid': return 'Оплачено';
+        case 'completed': return 'Завершено';
+        case 'cancelled': return 'Отменено';
+        default: return status;
+    }
+}
+
+function refreshUsers() {
+    loadUsers();
+}
+
+function refreshDeals() {
+    loadDeals();
+}
+
+// Обработчики форм
+document.getElementById('addBalanceForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = {
+        telegram_id: document.getElementById('userTelegramId').value,
+        amount: parseFloat(document.getElementById('addAmount').value),
+        currency: document.getElementById('addCurrency').value
+    };
+    
+    fetch('/admin/add_balance', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Баланс успешно пополнен');
+            this.reset();
+            loadUsers();
+        } else {
+            alert('Ошибка: ' + data.message);
+        }
+    });
+});
+
+document.getElementById('updateRatingForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = {
+        telegram_id: document.getElementById('ratingUserId').value,
+        successful_deals: parseInt(document.getElementById('successfulDeals').value)
+    };
+    
+    fetch('/admin/update_rating', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Рейтинг успешно обновлен');
+            this.reset();
+            loadUsers();
+        } else {
+            alert('Ошибка: ' + data.message);
+        }
+    });
+});
+
+function completeDeal(dealId) {
+    if (confirm('Принудительно завершить сделку?')) {
+        fetch(`/admin/complete_deal/${dealId}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Сделка завершена');
+                loadDeals();
+                loadDashboard();
+            } else {
+                alert('Ошибка: ' + data.message);
+            }
+        });
+    }
+}
+
+function cancelDeal(dealId) {
+    if (confirm('Отменить сделку?')) {
+        fetch(`/admin/cancel_deal/${dealId}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Сделка отменена');
+                loadDeals();
+                loadDashboard();
+            } else {
+                alert('Ошибка: ' + data.message);
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

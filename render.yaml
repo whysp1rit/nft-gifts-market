@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: nft-gifts-market
+    env: python
+    plan: free
+    buildCommand: chmod +x build.sh && ./build.sh
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: RENDER
+        value: true
+    healthCheckPath: /

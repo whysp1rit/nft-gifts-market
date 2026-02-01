@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}Сделка #{{ deal[0] }} - NFT Gifts Exchange{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-handshake me-2"></i>Сделка #{{ deal[0] }}</h4>
+                <span class="badge bg-light text-dark">
+                    {% if deal[7] == 'pending' %}
+                        <i class="fas fa-clock me-1"></i>Ожидает оплаты
+                    {% elif deal[7] == 'paid' %}
+                        <i class="fas fa-credit-card me-1"></i>Оплачено
+                    {% elif deal[7] == 'completed' %}
+                        <i class="fas fa-check-circle me-1"></i>Завершено
+                    {% elif deal[7] == 'cancelled' %}
+                        <i class="fas fa-times-circle me-1"></i>Отменено
+                    {% endif %}
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-gift me-2"></i>NFT подарок:</h6>
+                        {% if deal[3] %}
+                            <a href="{{ deal[3] }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-external-link-alt me-1"></i>Открыть подарок
+                            </a>
+                        {% endif %}
+                        {% if deal[4] %}
+                            <p class="mt-2"><strong>Получатель:</strong> {{ deal[4] }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-money-bill-wave me-2"></i>Стоимость:</h6>
+                        <h4 class="text-success">
+                            {% if deal[6] == 'stars' %}
+                                ⭐ {{ deal[5] }} звезд
+                            {% elif deal[6] == 'rub' %}
+                                ₽ {{ deal[5] }}
+                            {% elif deal[6] == 'uah' %}
+                                ₴ {{ deal[5] }}
+                            {% elif deal[6] == 'usd' %}
+                                $ {{ deal[5] }}
+                            {% elif deal[6] == 'eur' %}
+                                € {{ deal[5] }}
+                            {% endif %}
+                        </h4>
+                    </div>
+                </div>
+
+                {% if deal[12] %}
+                <div class="mb-4">
+                    <h6><i class="fas fa-info-circle me-2"></i>Описание:</h6>
+                    <p class="text-muted">{{ deal[12] }}</p>
+                </div>
+                {% endif %}
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>Создано: {{ deal[8] }}
+                        </small>
+                    </div>
+                    {% if deal[9] %}
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            <i class="fas fa-credit-card me-1"></i>Оплачено: {{ deal[9] }}
+                        </small>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if deal[7] == 'pending' %}
+                    {% if session.user_id == deal[1] %}
+                        <!-- Продавец видит ожидание оплаты -->
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle me-2"></i>Ожидание покупателя</h6>
+                            <p class="mb-2">Отправьте эту ссылку покупателю для оплаты сделки:</p>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="dealLink" 
+                                       value="{{ request.url }}" readonly>
+                                <button class="btn btn-outline-secondary" type="button" onclick="copyLink()">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- Покупатель может оплатить -->
+                        <div class="alert alert-warning">
+                            <h6><i class="fas fa-exclamation-triangle me-2"></i>Внимание!</h6>
+                            <p>Для оплаты сделки необходимо пополнить баланс через администратора.</p>
+                            <p><strong>Контакт администратора:</strong> @admin_username</p>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-success btn-lg" onclick="payDeal()">
+                                <i class="fas fa-credit-card me-2"></i>Оплатить сделку
+                            </button>
+                        </div>
+                    {% endif %}
+                {% elif deal[7] == 'paid' %}
+                    {% if session.user_id == deal[1] %}
+                        <!-- Продавец должен отправить NFT -->
+                        <div class="alert alert-success">
+                            <h6><i class="fas fa-check-circle me-2"></i>Сделка оплачена!</h6>
+                            <p>Покупатель оплатил сделку. Переведите NFT подарок и подтвердите выполнение.</p>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary btn-lg" onclick="completeDeal()">
+                                <i class="fas fa-gift me-2"></i>Подтвердить отправку NFT
+                            </button>
+                        </div>
+                    {% else %}
+                        <!-- Покупатель ждет NFT -->
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-clock me-2"></i>Ожидание продавца</h6>
+                            <p>Вы успешно оплатили сделку. Ожидайте получения NFT подарка от продавца.</p>
+                        </div>
+                    {% endif %}
+                {% elif deal[7] == 'completed' %}
+                    <div class="alert alert-success">
+                        <h6><i class="fas fa-check-circle me-2"></i>Сделка завершена!</h6>
+                        <p>NFT подарок успешно передан покупателю. Спасибо за использование нашей платформы!</p>
+                        {% if deal[10] %}
+                            <small class="text-muted">Завершено: {{ deal[10] }}</small>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Безопасность сделки</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Средства в безопасности
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Защита от мошенничества
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Поддержка 24/7
+                    </li>
+                </ul>
+                
+                <hr>
+                
+                <h6><i class="fas fa-headset me-2"></i>Нужна помощь?</h6>
+                <p class="small text-muted">Если возникли проблемы с сделкой, обратитесь в поддержку:</p>
+                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#supportModal">
+                    <i class="fas fa-envelope me-1"></i>Связаться с поддержкой
+                </button>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Информация</h6>
+            </div>
+            <div class="card-body">
+                <small class="text-muted">
+                    <p><strong>ID сделки:</strong> {{ deal[0] }}</p>
+                    <p><strong>Статус:</strong> 
+                        {% if deal[7] == 'pending' %}Ожидает оплаты
+                        {% elif deal[7] == 'paid' %}Оплачено
+                        {% elif deal[7] == 'completed' %}Завершено
+                        {% elif deal[7] == 'cancelled' %}Отменено
+                        {% endif %}
+                    </p>
+                    <p><strong>Создано:</strong> {{ deal[8] }}</p>
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyLink() {
+    const linkInput = document.getElementById('dealLink');
+    linkInput.select();
+    document.execCommand('copy');
+    
+    const button = event.target.closest('button');
+    const originalHTML = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-check"></i>';
+    button.classList.add('btn-success');
+    
+    setTimeout(() => {
+        button.innerHTML = originalHTML;
+        button.classList.remove('btn-success');
+    }, 2000);
+}
+
+function payDeal() {
+    if (confirm('Вы уверены, что хотите оплатить эту сделку?')) {
+        // Здесь будет AJAX запрос для оплаты
+        fetch('/pay_deal/{{ deal[0] }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Ошибка оплаты: ' + data.message);
+            }
+        });
+    }
+}
+
+function completeDeal() {
+    if (confirm('Подтвердите, что вы отправили NFT подарок покупателю')) {
+        // Здесь будет AJAX запрос для завершения сделки
+        fetch('/complete_deal/{{ deal[0] }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Ошибка: ' + data.message);
+            }
+        });
+    }
+}
+</script>
+{% endblock %}
